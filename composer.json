@@ -1,0 +1,30 @@
+{
+    "name": "vognev/laravel-serverless-aws",
+    "type": "library",
+    "description": "",
+    "require": {
+        "php": ">=7.2.0",
+        "docker-php/docker-php": "^2.0",
+        "jane-php/open-api-runtime": "^4 <4.3",
+        "pear/archive_tar": "^1.4",
+        "vognev/laravel-serverless": "dev-master"
+    },
+    "provide": {
+        "vognev/laravel-serverless-impl": "dev-master"
+    },
+    "conflict": {
+        "vognev/laravel-serverless-kubeless": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laravel\\Serverless\\Aws\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laravel\\Serverless\\Aws\\ServerlessServiceProvider"
+            ]
+        }
+    }
+}

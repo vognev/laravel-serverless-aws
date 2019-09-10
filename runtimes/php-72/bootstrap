@@ -1,0 +1,44 @@
+#!/opt/bin/php
+<?php declare(strict_types=1);
+
+require './vendor/autoload.php';
+require './bootstrap/app.php';
+
+use Laravel\Serverless\Aws\Runtime;
+use Laravel\Serverless\Aws\RequestFactory;
+use Laravel\Serverless\Application;
+
+is_dir('/tmp/app/public')           || mkdir('/tmp/app/public',           0755, true);
+is_dir('/tmp/framework/cache/data') || mkdir('/tmp/framework/cache/data', 0755, true);
+is_dir('/tmp/framework/sessions')   || mkdir('/tmp/framework/sessions',   0755, true);
+is_dir('/tmp/framework/views')      || mkdir('/tmp/framework/views',      0755, true);
+Application::useStoragePath('/tmp');
+
+(new Runtime(env("AWS_LAMBDA_RUNTIME_API")))->loop(function($event) {
+    switch ($handler = env('_HANDLER')) {
+        case 'artisan';
+            list($status, $output) = Application::artisan(array_merge(
+                [__FILE__], (array) $event
+            ));
+
+            return [
+                'exitCode'  => $status,
+                'body'      => $output
+            ];
+
+        case 'website':
+            $response = Application::website(
+                $request = RequestFactory::fromPayload($event)
+            );
+
+            return [
+                'isBase64Encoded'   => false,
+                'statusCode'        => $response->getStatusCode(),
+                'multiValueHeaders' => $response->headers->all(),
+                'body'              => $response->getContent()
+            ];
+
+        default:
+            throw new RuntimeException("Unknown handler $handler");
+    }
+});

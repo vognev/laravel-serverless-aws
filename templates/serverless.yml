@@ -1,0 +1,53 @@
+service: workbench
+
+provider:
+  name: aws
+  region: eu-central-1
+  runtime: provided
+  environment:
+    LOG_CHANNEL: stderr
+    SESSION_DRIVER: cookie
+    APP_PACKAGES_CACHE: /tmp/packages.php
+    APP_SERVICES_CACHE: /tmp/services.php
+    APP_CONFIG_CACHE: /tmp/config.php
+    APP_ROUTES_CACHE: /tmp/routes.php
+    APP_EVENTS_CACHE: /tmp/events.php
+
+layers:
+  runtime:
+    retain: false
+    package:
+      artifact: storage/serverless/runtime.zip
+
+package:
+  exclude:
+    - .idea/**
+    - storage/**
+    - node_modules/**
+    - bootstrap/cache/**
+    - tests/**
+
+functions:
+  website:
+    handler: website
+    memorySize: 128
+    timeout: 30
+    events:
+      - http: 'ANY /'
+      - http: 'ANY /{proxy+}'
+    layers:
+      - { Ref: RuntimeLambdaLayer }
+  artisan:
+    handler: artisan
+    memorySize: 128
+    timeout: 900
+    events:
+      - schedule:
+          rate: rate(1 minute)
+          input:
+            - 'schedule:run'
+            - '--no-ansi'
+            - '-n'
+          enabled: true
+    layers:
+      - { Ref: RuntimeLambdaLayer }

@@ -1,0 +1,42 @@
+version: '3.4'
+
+x-function: &function
+  image: python:3-alpine3.9
+  entrypoint: ["/driver/driver.py", "-p", "1010", "/opt/bootstrap"]
+  working_dir: /var/task
+  read_only: true
+  environment:
+    LOG_CHANNEL: stderr
+    SESSION_DRIVER: cookie
+    APP_PACKAGES_CACHE: /tmp/packages.php
+    APP_SERVICES_CACHE: /tmp/services.php
+    APP_CONFIG_CACHE: /tmp/config.php
+    APP_ROUTES_CACHE: /tmp/routes.php
+    APP_EVENTS_CACHE: /tmp/events.php
+  tmpfs:
+    - /tmp
+  volumes:
+    - ./storage/serverless/context/driver:/driver:ro
+    - ./storage/serverless/runtime:/opt:ro
+    - .:/var/task:ro
+
+x-gateway: &gateway
+  image: python:3-alpine3.9
+  entrypoint: ["/driver/gateway.py"]
+  read_only: true
+  volumes:
+    - ./storage/serverless/context/driver:/driver:ro
+
+services:
+  artisan:
+    <<: *function
+    network_mode: host
+    command: artisan
+
+  website:
+    <<: *function
+    command: website
+
+  gateway:
+    <<: *gateway
+    command: ["-p", "1010", "website"]
