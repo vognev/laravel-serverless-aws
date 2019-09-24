@@ -1,16 +1,23 @@
 {
     "name": "vognev/laravel-serverless-aws",
+    "description": "Laravel/Serverless for AWS Lambda",
+    "keywords": ["laravel", "serverless", "lambda"],
     "type": "library",
-    "description": "",
+    "license": "MIT",
+    "version": "v0.0.1",
+    "authors": [{
+        "name": "Vitaliy Ognev",
+        "email": "vitaliy.ognev@gmail.com"
+    }],
     "require": {
         "php": ">=7.2.0",
         "docker-php/docker-php": "^2.0",
         "jane-php/open-api-runtime": "^4 <4.3",
         "pear/archive_tar": "^1.4",
-        "vognev/laravel-serverless": "dev-master"
+        "vognev/laravel-serverless": "^0.0.1"
     },
     "provide": {
-        "vognev/laravel-serverless-impl": "dev-master"
+        "laravel/serverless": "1.0.0"
     },
     "conflict": {
         "vognev/laravel-serverless-kubeless": "*"
