@@ -21,6 +21,7 @@ return [
                 'pdo_mysql',
                 'readline',
                 'session',
+                'simplexml',
                 'sockets',
                 'tokenizer',
                 'zip',

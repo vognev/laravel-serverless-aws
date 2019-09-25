@@ -12,13 +12,22 @@ is_dir('/tmp/app/public')           || mkdir('/tmp/app/public',           0755, 
 is_dir('/tmp/framework/cache/data') || mkdir('/tmp/framework/cache/data', 0755, true);
 is_dir('/tmp/framework/sessions')   || mkdir('/tmp/framework/sessions',   0755, true);
 is_dir('/tmp/framework/views')      || mkdir('/tmp/framework/views',      0755, true);
+
 Application::useStoragePath('/tmp');
 
 (new Runtime(env("AWS_LAMBDA_RUNTIME_API")))->loop(function($event) {
     switch ($handler = env('_HANDLER')) {
         case 'artisan';
+            if (array_key_exists('Records', $event)) {
+                $args = ['serverless:work', base64_encode($event['Records'][0]['body'])];
+            } else {
+                $args = (array) $event;
+            }
+
+            echo sprintf('CLI %s', serialize($args)), PHP_EOL;
+
             list($status, $output) = Application::artisan(array_merge(
-                [__FILE__], (array) $event
+                [__FILE__], (array) $args
             ));
 
             return [
@@ -27,9 +36,11 @@ Application::useStoragePath('/tmp');
             ];
 
         case 'website':
-            $response = Application::website(
-                $request = RequestFactory::fromPayload($event)
-            );
+            $request = RequestFactory::fromPayload($event);
+
+            echo sprintf('WEB %s %s', $request->getMethod(), $request->getRequestUri()), PHP_EOL;
+
+            $response = Application::website($request);
 
             return [
                 'isBase64Encoded'   => false,

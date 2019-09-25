@@ -33,5 +33,8 @@
                 "Laravel\\Serverless\\Aws\\ServerlessServiceProvider"
             ]
         }
+    },
+    "suggest": {
+        "aws/aws-sdk-php:~3.0": "AWS SQS Queue support"
     }
 }
